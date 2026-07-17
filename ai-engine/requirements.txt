@@ -1,0 +1,24 @@
+# --- Web Framework & Server ---
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+pydantic>=2.7.0
+pydantic-settings>=2.0.0
+
+# --- Vision-Language Model (VLM) Providers ---
+anthropic>=0.28.0
+openai>=1.30.0
+google-generativeai>=0.5.4
+
+# --- Machine Learning & Embeddings ---
+sentence-transformers>=3.0.0
+numpy>=1.26.0
+
+# --- Image Processing & Computer Vision ---
+Pillow>=10.3.0
+pytesseract>=0.3.10
+imagehash>=4.3.1
+scikit-image>=0.23.2
+
+# --- Utilities ---
+python-dotenv>=1.0.1

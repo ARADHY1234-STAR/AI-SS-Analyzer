@@ -1,0 +1,138 @@
+[
+  {
+    "model": "Gemini 2.5 Pro (Free)",
+    "model_id": "google/gemini-2.5-pro-exp-03-25:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'No endpoints found ",
+    "activity_summary": [],
+    "time_sec": 1.4,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Gemini 2.5 Flash (Free)",
+    "model_id": "google/gemini-2.5-flash-preview-05-20:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 400 - {'error': {'message': 'google/gemini-2.5-f",
+    "activity_summary": [],
+    "time_sec": 0.3,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "LLaMA 4 Maverick (Free)",
+    "model_id": "meta-llama/llama-4-maverick:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.4,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "LLaMA 4 Scout (Free)",
+    "model_id": "meta-llama/llama-4-scout:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.4,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Claude 3.5 Sonnet (Free)",
+    "model_id": "anthropic/claude-3.5-sonnet:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'No endpoints found ",
+    "activity_summary": [],
+    "time_sec": 2.5,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Claude 3 Haiku (Free)",
+    "model_id": "anthropic/claude-3-haiku:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.6,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Qwen2.5 VL 72B (Free)",
+    "model_id": "qwen/qwen2.5-vl-72b-instruct:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.9,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Qwen2.5 VL 32B (Free)",
+    "model_id": "qwen/qwen2.5-vl-32b-instruct:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'No endpoints found ",
+    "activity_summary": [],
+    "time_sec": 0.5,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "Mistral Small 3.1 (Free)",
+    "model_id": "mistralai/mistral-small-3.1-24b-instruct:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.4,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "DeepSeek V3 (Free)",
+    "model_id": "deepseek/deepseek-chat-v3-0324:free",
+    "score": null,
+    "confidence": null,
+    "progressed": null,
+    "idle_detected": null,
+    "task": "ERROR: Error code: 404 - {'error': {'message': 'This model is unava",
+    "activity_summary": [],
+    "time_sec": 0.4,
+    "status": "\u274c FAIL"
+  },
+  {
+    "model": "OpenRouter Auto (Free)",
+    "model_id": "openrouter/free",
+    "score": 0.85,
+    "confidence": 0.92,
+    "progressed": true,
+    "idle_detected": false,
+    "task": "Developing and documenting an AI productivity monitoring system",
+    "activity_summary": [
+      "Actively coding in VS Code",
+      "Researching AI productivity tools",
+      "Documenting project details"
+    ],
+    "time_sec": 36.0,
+    "status": "\u2705 OK"
+  }
+]

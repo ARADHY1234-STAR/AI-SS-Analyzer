@@ -1,0 +1,27 @@
+# Large Model folders
+my_models/
+local_models/
+*.bin
+*.safetensors
+ai-engine/my_models/
+
+# Virtual environments
+venv/
+.venv/
+ai-engine/venv/
+anaconda3/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+ai-engine/**/__pycache__/
+
+# Environment secrets
+.env
+ai-engine/.env
+
+# Test caches & split screenshots
+.pytest_cache/
+ai-engine/.pytest_cache/
+split_screenshots/
+*.png
