@@ -1,63 +1,49 @@
 """
 Client for generating vector embeddings for images and text.
+Refactored for Streamlit Cloud: uses Hugging Face Inference API instead of
+local sentence-transformers models to stay within the 1 GB RAM limit.
 """
 
+import base64
 import io
 import logging
 import os
-import requests
 
 import numpy as np
+import requests
 from PIL import Image, UnidentifiedImageError
-from sentence_transformers import SentenceTransformer
 
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
+# --- Hugging Face Inference API Configuration ---
+HF_TOKEN = os.getenv("HF_TOKEN", "")
+CLIP_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/clip-ViT-B-32"
+TEXT_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+HF_HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
+
 
 class EmbeddingClient:
     """
-    Client for generating semantic embeddings.
-    Supports both visual (CLIP) and textual (MiniLM) embeddings.
+    Client for generating semantic embeddings via Hugging Face Inference API.
+    Supports both visual (CLIP) and textual (MiniLM) embeddings without loading
+    any models into local RAM.
     """
 
     def __init__(self) -> None:
         """
-        Initializes the embedding client and eagerly loads the pre-trained models.
-        Model loading is heavy, so this class is intended to be instantiated once 
-        and shared across the pipeline.
+        Initializes the embedding client. No local models are loaded;
+        all inference is offloaded to the Hugging Face API.
         """
-        os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "60"
-        os.environ["HF_HUB_ETAG_TIMEOUT"] = "60"
-
-        # Load CLIP Model (online first, then offline cache)
-        def _load_clip_model(model_name: str) -> SentenceTransformer:
-            try:
-                return SentenceTransformer(model_name)
-            except Exception:
-                logger.warning("Network error loading CLIP online. Switching to offline cache...")
-                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-                clip_local_path = os.path.join(base_dir, "my_models", "clip-ViT-B-32")
-                os.environ["HF_HUB_OFFLINE"] = "1"
-                return SentenceTransformer(clip_local_path, local_files_only=True)
-
-        self.clip_model = _load_clip_model(settings.clip_model_name)
-
-        # Load Text Model (default fallback behavior)
-        def _load_text_model(model_name: str) -> SentenceTransformer:
-            try:
-                return SentenceTransformer(model_name)
-            except (requests.exceptions.RequestException, ConnectionError, TimeoutError):
-                logger.warning("Hugging Face timeout detected for text model, switching to offline cache...")
-                os.environ["HF_HUB_OFFLINE"] = "1"
-                return SentenceTransformer(model_name, local_files_only=True)
-
-        self.text_model = _load_text_model(settings.text_embedding_model_name)
+        logger.info(
+            "EmbeddingClient initialized (API mode). "
+            "CLIP and MiniLM inference offloaded to Hugging Face Inference API."
+        )
 
     def get_image_embedding(self, image_bytes: bytes) -> np.ndarray:
         """
-        Generates a semantic vector embedding for an image using CLIP.
+        Generates a semantic vector embedding for an image using CLIP via HF API.
 
         Args:
             image_bytes: Raw image data (e.g., JPEG, PNG).
@@ -70,12 +56,41 @@ class EmbeddingClient:
             return np.array([])
 
         try:
+            # Convert image bytes to base64 for the HF API
             image = Image.open(io.BytesIO(image_bytes))
-            # sentence-transformers natively supports PIL Image inputs for CLIP models
-            embedding: np.ndarray = self.clip_model.encode(image)
-            return embedding
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+
+            # Resize to reduce payload size for API
+            max_dim = 224
+            if max(image.size) > max_dim:
+                ratio = max_dim / max(image.size)
+                new_size = (int(image.width * ratio), int(image.height * ratio))
+                image = image.resize(new_size, Image.LANCZOS)
+
+            buffer = io.BytesIO()
+            image.save(buffer, format="JPEG", quality=75)
+            b64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+            response = requests.post(
+                CLIP_API_URL,
+                headers=HF_HEADERS,
+                json={"inputs": {"image": b64_str}},
+                timeout=30,
+            )
+
+            if response.status_code != 200:
+                logger.warning(f"CLIP API error ({response.status_code}): {response.text[:200]}")
+                return np.array([])
+
+            embedding_data = response.json()
+            return np.array(embedding_data, dtype=np.float32).flatten()
+
         except UnidentifiedImageError:
             logger.error("Failed to generate image embedding: Invalid or corrupted image bytes.")
+            return np.array([])
+        except requests.exceptions.Timeout:
+            logger.error("CLIP API request timed out.")
             return np.array([])
         except Exception as e:
             logger.error(f"Unexpected error during image embedding generation: {str(e)}")
@@ -83,7 +98,7 @@ class EmbeddingClient:
 
     def get_text_embedding(self, text: str) -> np.ndarray:
         """
-        Generates a semantic vector embedding for a string of text.
+        Generates a semantic vector embedding for a string of text via HF API.
 
         Args:
             text: The string to embed (e.g., OCR output).
@@ -96,8 +111,23 @@ class EmbeddingClient:
             return np.array([])
 
         try:
-            embedding: np.ndarray = self.text_model.encode(text.strip())
-            return embedding
+            response = requests.post(
+                TEXT_API_URL,
+                headers=HF_HEADERS,
+                json={"inputs": text.strip()[:512]},  # Truncate to save API bandwidth
+                timeout=30,
+            )
+
+            if response.status_code != 200:
+                logger.warning(f"Text embedding API error ({response.status_code}): {response.text[:200]}")
+                return np.array([])
+
+            embedding_data = response.json()
+            return np.array(embedding_data, dtype=np.float32).flatten()
+
+        except requests.exceptions.Timeout:
+            logger.error("Text embedding API request timed out.")
+            return np.array([])
         except Exception as e:
             logger.error(f"Unexpected error during text embedding generation: {str(e)}")
             return np.array([])

@@ -25,3 +25,6 @@ ai-engine/.env
 ai-engine/.pytest_cache/
 split_screenshots/
 *.png
+
+# Backup files (local-only, not pushed to repo)
+*.bak

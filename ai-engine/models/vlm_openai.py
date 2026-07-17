@@ -18,37 +18,28 @@ from PIL import Image
 from config.settings import settings
 from models.vlm_base import VLMService, VLMResult
 
-# 1. Force strict offline operation to bypass the Hugging Face 504 CDN timeouts
-os.environ["HF_HUB_OFFLINE"] = "1"
-os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "120"
-
-from sentence_transformers import SentenceTransformer
+import requests as hf_requests
 
 logger = logging.getLogger(__name__)
 
+# --- Hugging Face Inference API for CLIP (replaces local sentence-transformers) ---
+HF_TOKEN = os.getenv("HF_TOKEN", "")
+CLIP_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/clip-ViT-B-32"
+CLIP_HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
 
-def initialize_embedding_model():
-    """Loads the CLIP model entirely from local cache to secure fast, offline bootups."""
-    try:
-        # Check local path first, default to local cache fallback
-        local_path = "./my_models/clip-ViT-B-32"
-        model_path = local_path if os.path.exists(local_path) else "sentence-transformers/clip-ViT-B-32"
-        
-        return SentenceTransformer(model_path, local_files_only=True)
-    except Exception as e:
-        print(f"\n[WARNING] Offline model load failed: {e}")
-        print("Please run: hf download sentence-transformers/clip-ViT-B-32 --local-dir ./my_models/clip-ViT-B-32\n")
-        # Direct fallback attempt if path check was strict
-        try:
-            return SentenceTransformer("sentence-transformers/clip-ViT-B-32", local_files_only=True)
-        except Exception as fallback_err:
-            print(f"\n[ERROR] Direct fallback offline load also failed: {fallback_err}")
-            return None
+
+def get_clip_embeddings(input_data):
+    """Fetches embeddings from HF API to save 1.5GB of local RAM."""
+    response = hf_requests.post(CLIP_API_URL, headers=CLIP_HEADERS, json={"inputs": input_data})
+    if response.status_code != 200:
+        print(f"API Error: {response.text}")
+        return None
+    return response.json()
 
 
 class ProductivityAnalyzer:
     def __init__(self):
-        self.encoder = initialize_embedding_model()
+        self.encoder = None  # CLIP offloaded to HF Inference API for Streamlit Cloud
 
     def analyze_batch(self, telemetry_data, parsed_vlm_json, ss_are_same: bool = False):
         """
