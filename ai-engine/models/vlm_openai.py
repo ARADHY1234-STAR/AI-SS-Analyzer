@@ -39,7 +39,7 @@ def get_clip_embeddings(input_data):
 
 class ProductivityAnalyzer:
     def __init__(self):
-        self.encoder = None  # CLIP offloaded to HF Inference API for Streamlit Cloud
+        self.encoder = None  # CLIP offloaded to HF Inference API for Render
 
     def analyze_batch(self, telemetry_data, parsed_vlm_json, ss_are_same: bool = False):
         """

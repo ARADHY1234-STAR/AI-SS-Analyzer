@@ -54,10 +54,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
 # Mount the router containing our /sessions/analyze endpoint
 app.include_router(api_router)
 
-         
+# Serve index.html at root
+@app.get("/")
+async def serve_frontend():
+    # Attempt to find frontend directory whether running from ai-engine or root
+    frontend_dir = "frontend" if os.path.exists("frontend") else "../frontend"
+    return FileResponse(os.path.join(frontend_dir, "index.html"))
+
+# Mount static assets (css, js, etc.) if they exist
+if os.path.exists("frontend"):
+    app.mount("/", StaticFiles(directory="frontend"), name="frontend")
+elif os.path.exists("../frontend"):
+    app.mount("/", StaticFiles(directory="../frontend"), name="frontend")
+
 @app.get("/health", tags=["System"])
 async def health_check():
     """

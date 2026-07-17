@@ -1,7 +1,7 @@
 """
 Client for generating vector embeddings for images and text.
-Refactored for Streamlit Cloud: uses Hugging Face Inference API instead of
-local sentence-transformers models to stay within the 1 GB RAM limit.
+Refactored for Render: uses Hugging Face Inference API instead of
+local sentence-transformers models to stay within the 512 MB RAM limit.
 """
 
 import base64
